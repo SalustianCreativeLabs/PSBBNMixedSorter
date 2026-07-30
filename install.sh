@@ -148,27 +148,27 @@ trap 'rm -f "$TMP"' EXIT
 
 # >>> psbbn-mixed-sorter >>>
 # Reorders selected.list into a single alphabetical run spanning PS1 and PS2,
-# instead of one block per console. Launchers (INC) stay at the top and apps
-# (APP) at the bottom; only games are interleaved.
+# instead of one block per console. Games come first, then launchers (INC) and
+# apps (APP) grouped at the end, so the collection opens straight on a game.
 # Reuses the toolkit's own list-sorter.py, so series grouping, roman numerals
 # and title normalisation behave exactly as upstream intends.
 if [ -s "${SELECTED_LIST}" ]; then
-    _pms_inc="${SCRIPTS_DIR}/tmp/_pms_inc.list"
     _pms_games="${SCRIPTS_DIR}/tmp/_pms_games.list"
+    _pms_inc="${SCRIPTS_DIR}/tmp/_pms_inc.list"
     _pms_apps="${SCRIPTS_DIR}/tmp/_pms_apps.list"
 
-    awk -F'|' '$4=="INC"' "${SELECTED_LIST}" > "$_pms_inc"
     awk -F'|' '$4=="DVD"||$4=="CD"||$4=="POPS"||$4=="__.POPS"||$4=="SMB"' "${SELECTED_LIST}" > "$_pms_games"
+    awk -F'|' '$4=="INC"' "${SELECTED_LIST}" > "$_pms_inc"
     awk -F'|' '$4=="APP"' "${SELECTED_LIST}" > "$_pms_apps"
 
     if python3 "${HELPER_DIR}/list-sorter.py" "$_pms_games" 2>>"${LOG_FILE}"; then
-        cat "$_pms_inc" "$_pms_games" "$_pms_apps" > "${SELECTED_LIST}"
+        cat "$_pms_games" "$_pms_inc" "$_pms_apps" > "${SELECTED_LIST}"
         echo "PSBBN Mixed Sorter: global alphabetical order applied." >> "${LOG_FILE}"
     else
         echo "[!] PSBBN Mixed Sorter: sort failed, keeping original order." >> "${LOG_FILE}"
     fi
 
-    rm -f "$_pms_inc" "$_pms_games" "$_pms_apps"
+    rm -f "$_pms_games" "$_pms_inc" "$_pms_apps"
 fi
 # <<< psbbn-mixed-sorter <<<
 PATCH

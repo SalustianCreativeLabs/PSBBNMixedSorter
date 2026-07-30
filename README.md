@@ -10,16 +10,28 @@ them, so a series split across consoles reads in order:
 ```
 before                          after
 ------                          -----
-Ace Combat 04    (PS2)          Ace Combat 3     (PS1)
-Ace Combat 5     (PS2)          Ace Combat 04    (PS2)
-Ace Combat Zero  (PS2)          Ace Combat 5     (PS2)
-...                             Ace Combat Zero  (PS2)
-Ace Combat 3     (PS1)          Akumajou Dracula X (PS1)
-Akumajou Dracula X (PS1)        Alone in the Dark  (PS2)
+Open PS2 Loader                 Ace Combat 3       (PS1)
+POPSLoader                      Ace Combat 04      (PS2)
+BB Navigator                    Ace Combat 5       (PS2)
+HOSDMenu                        Ace Combat Zero    (PS2)
+Ace Combat 04    (PS2)          Akumajou Dracula X (PS1)
+Ace Combat 5     (PS2)          Alone in the Dark  (PS2)
+Ace Combat Zero  (PS2)          Ape Escape         (PS1)
+...                             Ape Escape 2       (PS2)
+Ace Combat 3     (PS1)          Ape Escape 3       (PS2)
+Akumajou Dracula X (PS1)        ...
+...                             Zone of the Enders (PS2)
+wLaunchELF                      Open PS2 Loader
+R3Configurator                  POPSLoader
+                                BB Navigator
+                                HOSDMenu
+                                wLaunchELF
+                                R3Configurator
 ```
 
-Launchers (Open PS2 Loader, POPSLoader, BB Navigator, HOSDMenu) stay pinned at the top and
-apps stay at the bottom — only games are interleaved.
+Only games are interleaved. Launchers (Open PS2 Loader, POPSLoader, BB Navigator, HOSDMenu)
+and apps (wLaunchELF, R3Configurator) are grouped at the **end** of the collection, so it
+opens straight on a game instead of on system shortcuts.
 
 ## Install
 
@@ -83,9 +95,14 @@ The grouping originates in `game-selector.py`, which buckets entries into fixed 
 those sections but never merge them.
 
 So the patch inserts one block right after the selector runs: split `selected.list` by media
-type, sort **only** the games with the toolkit's own `list-sorter.py`, concatenate back. That
-reuses upstream's title normalisation, roman numerals and series grouping (`overrides`,
-`truncate_prefixes`) rather than reimplementing a sorter.
+type, sort **only** the games with the toolkit's own `list-sorter.py`, then concatenate back as
+games → launchers → apps. That reuses upstream's title normalisation, roman numerals and series
+grouping (`overrides`, `truncate_prefixes`) rather than reimplementing a sorter.
+
+Note the direction: the order of `selected.list` **is** the on-screen order. `tac` in
+`create_game_partitions()` reverses it when creating partitions, and the console renders the APA
+table from the highest address down, which cancels the inversion. Entries at the end of
+`selected.list` land on the lowest addresses and appear last.
 
 What it deliberately leaves alone:
 
